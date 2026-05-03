@@ -1,0 +1,19 @@
+{
+  "lm_studio": {
+    "base_url": "http://localhost:1234",
+    "embedding_model": "local-model",
+    "chat_model": "local-model"
+  },
+  "obsidian": {
+    "vault_path": "./data/obsidian",
+    "extensions": [".md"]
+  },
+  "chroma": {
+    "collection_name": "obsidian-notes",
+    "persist_directory": "./data/chroma"
+  },
+  "chunking": {
+    "chunk_size": 500,
+    "chunk_overlap": 50
+  }
+}
