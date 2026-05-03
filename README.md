@@ -59,6 +59,12 @@ opencode-rag search "ваш запрос"
 opencode-rag chat "ваш вопрос"
 # или интерактивный режим
 opencode-rag chat
+
+# Управление заметками
+opencode-rag edit read "Название заметки"        # Прочитать заметку
+opencode-rag edit write "Название заметки"       # Создать/редактировать (интерактивно)
+opencode-rag edit append "Заметка" "Текст"       # Добавить текст в конец
+opencode-rag edit delete "Название заметки"      # Удалить заметку
 ```
 
 ### NPM скрипты
@@ -95,7 +101,8 @@ npm run chat "вопрос"    # Единичный запрос
 │   ├── cli.js        # OpenCode CLI
 │   ├── ingest.js     # Индексация заметок
 │   ├── search.js     # Семантический поиск
-│   └── chat.js       # RAG чат
+│   ├── chat.js       # RAG чат
+│   └── edit.js       # Редактор заметок (read/write/append/delete)
 ├── config/
 │   └── config.json   # Конфигурация
 ├── data/
