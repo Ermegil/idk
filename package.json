@@ -1,7 +1,7 @@
 {
   "name": "opencode-rag",
   "version": "0.1.0",
-  "description": "RAG system with Obsidian vault, LM Studio embeddings/chat, and OpenCode CLI",
+  "description": "RAG system with Obsidian vault, LM Studio embeddings/chat, and OpenCode CLI with MCP support",
   "bin": {
     "opencode-rag": "./src/cli.js"
   },
@@ -12,7 +12,8 @@
     "search": "node src/search.js",
     "chat": "node src/chat.js",
     "status": "node src/cli.js status",
-    "edit": "node src/edit.js"
+    "edit": "node src/edit.js",
+    "mcp-server": "node scripts/mcp-server.js"
   },
   "dependencies": {
     "@langchain/core": "^0.3.0",
@@ -22,7 +23,8 @@
     "glob": "^11.0.0",
     "gray-matter": "^4.0.3",
     "langchain": "^0.3.0",
-    "marked": "^15.0.0"
+    "marked": "^15.0.0",
+    "uuid": "^11.0.0"
   },
   "devDependencies": {},
   "engines": {
