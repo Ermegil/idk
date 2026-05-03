@@ -9,7 +9,7 @@ env/
 venv/
 .venv/
 .ENV
-.venv.bak/
+.python-version
 pip-log.txt
 pip-delete-this-directory.txt
 .tox/
@@ -20,11 +20,10 @@ nosetests.xml
 coverage.xml
 *.cover
 *.log
-*.pot
-*.pyc
-*.pyo
-.pytest_cache/
+.git/
 .mypy_cache/
+.pytest_cache/
+.hypothesis/
 
 # Distribution / packaging
 .Python
@@ -43,27 +42,26 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
-
-# Environment variables
-.env
-.venv
-.envrc
-.env.*
 
 # IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
-*.tmp
 
-# OS generated files
+# OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+htmlcov/
 ```
