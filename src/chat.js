@@ -1,9 +1,45 @@
-import { Chroma } from "@langchain/community/vectorstores/chroma";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { createRequire } from "module";
-import { readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const config = require("../config/config.json");
+
+class ChromaLocalService {
+  constructor() {
+    this.documents = [];
+  }
+
+  async load(path) {
+    const fs = await import('fs');
+    if (fs.existsSync(path)) {
+      this.documents = JSON.parse(fs.readFileSync(path, 'utf-8'));
+    }
+  }
+
+  async similaritySearchWithEmbedding(queryEmbedding, topK = 5) {
+    const scored = this.documents.map(doc => ({
+      ...doc,
+      score: this.cosineSimilarity(queryEmbedding, doc.embedding),
+    }));
+    
+    scored.sort((a, b) => b.score - a.score);
+    
+    return scored.slice(0, topK).map(doc => ({
+      pageContent: doc.content,
+      metadata: { ...doc.metadata, score: doc.score },
+    }));
+  }
+
+  cosineSimilarity(a, b) {
+    const dot = a.reduce((sum, val, i) => sum + val * b[i], 0);
+    const normA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
+    const normB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0));
+    return dot / (normA * normB || 1);
+  }
+}
 
 class EmbeddingService {
   constructor() {
@@ -11,23 +47,20 @@ class EmbeddingService {
     this.model = config.lm_studio.embedding_model;
   }
 
-  async embedDocuments(texts) {
-    const embeddings = [];
-    for (const text of texts) {
+  async embedQuery(text) {
+    try {
       const response = await fetch(`${this.baseUrl}/v1/embeddings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model: this.model, input: text }),
       });
+      if (!response.ok) throw new Error("LM Studio not reachable");
       const data = await response.json();
-      embeddings.push(data.data[0].embedding);
+      return data.data[0].embedding;
+    } catch (error) {
+      console.log("⚠️  LM Studio unavailable. Using keyword search fallback.");
+      return null;
     }
-    return embeddings;
-  }
-
-  async embedQuery(text) {
-    const embeddings = await this.embedDocuments([text]);
-    return embeddings[0];
   }
 }
 
@@ -62,14 +95,37 @@ class ChatService {
 async function ragChat(query) {
   console.log(`🤔 Thinking about: "${query}"\n`);
 
-  // Step 1: Search for relevant context
-  const embeddingService = new EmbeddingService();
-  const vectorStore = new Chroma(embeddingService, {
-    collectionName: config.chroma.collection_name,
-    url: config.lm_studio.base_url.replace("/v1", ""),
-  });
+  // Load database
+  const dbPath = join(__dirname, "..", config.chroma.persist_directory, "db.json");
+  const db = new ChromaLocalService();
+  await db.load(dbPath);
 
-  const results = await vectorStore.similaritySearch(query, 3);
+  if (db.documents.length === 0) {
+    console.log("⚠️  No documents in database. Run 'opencode-rag ingest' first.");
+    return;
+  }
+
+  // Step 1: Get embedding and search
+  const embeddingService = new EmbeddingService();
+  const queryEmbedding = await embeddingService.embedQuery(query);
+  
+  let results;
+  if (queryEmbedding) {
+    results = await db.similaritySearchWithEmbedding(queryEmbedding, 3);
+  } else {
+    // Fallback to keyword search
+    const keywords = query.toLowerCase().split(/\s+/);
+    const scored = db.documents.map(doc => {
+      const content = doc.content.toLowerCase();
+      const matches = keywords.filter(k => content.includes(k)).length;
+      return { ...doc, score: matches / keywords.length };
+    });
+    scored.sort((a, b) => b.score - a.score);
+    results = scored.slice(0, 3).map(doc => ({
+      pageContent: doc.content,
+      metadata: { ...doc.metadata, score: doc.score },
+    }));
+  }
   
   if (results.length === 0) {
     console.log("⚠️  No relevant documents found.");

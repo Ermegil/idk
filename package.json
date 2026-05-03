@@ -1,5 +1,5 @@
 {
-  "project_name": "obsidian-rag",
+  "name": "opencode-rag",
   "version": "0.1.0",
   "description": "RAG system with Obsidian vault, LM Studio embeddings/chat, and OpenCode CLI",
   "bin": {
@@ -11,7 +11,8 @@
     "ingest": "node src/ingest.js",
     "search": "node src/search.js",
     "chat": "node src/chat.js",
-    "status": "node src/cli.js status"
+    "status": "node src/cli.js status",
+    "edit": "node src/edit.js"
   },
   "dependencies": {
     "@langchain/core": "^0.3.0",

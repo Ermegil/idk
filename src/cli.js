@@ -50,6 +50,18 @@ program
   });
 
 program
+  .command("edit <subcommand> [args...]")
+  .description("Edit Obsidian notes (read/write/append/delete)")
+  .action((subcommand, args) => {
+    const allArgs = [subcommand, ...(args || [])];
+    const child = spawn("node", [join(__dirname, "edit.js"), ...allArgs], {
+      stdio: "inherit",
+      shell: true,
+    });
+    child.on("close", (code) => process.exit(code));
+  });
+
+program
   .command("status")
   .description("Show system status")
   .action(async () => {
@@ -73,6 +85,7 @@ program
     console.log("\n📁 Obsidian Vault: ./data/obsidian");
     console.log("💾 Vector DB: Chroma (local)");
     console.log("\nRun 'opencode-rag ingest' to index your notes.");
+    console.log("Run 'opencode-rag edit read <note>' to manage notes.");
   });
 
 program.parse();
