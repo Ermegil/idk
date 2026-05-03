@@ -1,9 +1,0 @@
-{
-  "rutracker_username": "YOUR_USERNAME",
-  "rutracker_password": "YOUR_PASSWORD",
-  "qbittorrent_url": "http://localhost:8080",
-  "qbittorrent_username": "admin",
-  "qbittorrent_password": "adminadmin",
-  "download_path": "C:/Music/Incoming",
-  "min_seeds": 1
-}
